@@ -89,6 +89,8 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+PSET1/.idea/
+pset2/.spyproject
 
 # Spyder project settings
 .spyderproject

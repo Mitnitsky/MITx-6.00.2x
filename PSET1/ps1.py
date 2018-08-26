@@ -2,11 +2,14 @@
 # 6.00.2x Problem Set 1: Space Cows 
 
 from ps1_partition import get_partitions
-import time
 
-#================================
+# ================================
 # Part A: Transporting Space Cows
-#================================
+# ================================
+import operator
+import time
+import itertools
+
 
 def load_cows(filename):
     """
@@ -24,7 +27,7 @@ def load_cows(filename):
     cow_dict = dict()
 
     f = open(filename, 'r')
-    
+
     for line in f:
         line_data = line.split(',')
         cow_dict[line_data[0]] = int(line_data[1])
@@ -32,7 +35,7 @@ def load_cows(filename):
 
 
 # Problem 1
-def greedy_cow_transport(cows,limit=10):
+def greedy_cow_transport(cows, limit=10):
     """
     Uses a greedy heuristic to determine an allocation of cows that attempts to
     minimize the number of spaceship trips needed to transport all the cows. The
@@ -54,12 +57,22 @@ def greedy_cow_transport(cows,limit=10):
     transported on a particular trip and the overall list containing all the
     trips
     """
-    # TODO: Your code here
-    pass
+    sorted_d = sorted(cows.items(), key=operator.itemgetter(1))
+    ships = []
+    while sorted_d:
+        ship = []
+        ship_limit = limit
+        for k in reversed(sorted_d):
+            if k[1] <= ship_limit:
+                ship_limit -= k[1]
+                ship.append(k)
+                sorted_d.remove(k)
+        ships.append(ship)
+    return ships
 
 
 # Problem 2
-def brute_force_cow_transport(cows,limit=10):
+def brute_force_cow_transport(cows, limit=10):
     """
     Finds the allocation of cows that minimizes the number of spaceship trips
     via brute force.  The brute force algorithm should follow the following method:
@@ -79,10 +92,25 @@ def brute_force_cow_transport(cows,limit=10):
     transported on a particular trip and the overall list containing all the
     trips
     """
-    # TODO: Your code here
-    pass
+    comb = itertools.permutations(cows.items(), len(cows.items()))
+    result = []
+    for a in comb:
+        ships = []
+        used = []
+        while len(used) != len(a):
+            ship = []
+            ship_limit = limit
+            for k in reversed(a):
+                if k[1] <= ship_limit and k not in used:
+                    ship_limit -= k[1]
+                    ship.append(k)
+                    used.append(k)
+            ships.append(ship)
+        if not result or len(ships) < len(result):
+            result = ships
+    return result
 
-        
+
 # Problem 3
 def compare_cow_transport_algorithms():
     """
@@ -97,7 +125,19 @@ def compare_cow_transport_algorithms():
     Returns:
     Does not return anything.
     """
-    # TODO: Your code here
+    cows = load_cows("ps1_cow_data.txt")
+    limit = 10
+    start_time_1 = time.time()
+    print("Running greedy algorithm:...")
+    greedy_res = len(greedy_cow_transport(cows, limit))
+    end_1 = time.time() - start_time_1
+    print("time taken-{}, ships a"
+          "mount-{}".format(end_1, greedy_res))
+    start_time_2 = time.time()
+    print("Running brute force algorithm:...")
+    brute_res = len(brute_force_cow_transport(cows, limit))
+    end_2 = time.time() - start_time_2
+    print("time taken-{}, ships amount-{}".format(end_2, brute_res))
     pass
 
 
@@ -107,11 +147,12 @@ Do not submit this along with any of your answers. Uncomment the last two
 lines to print the result of your problem.
 """
 
-cows = load_cows("ps1_cow_data.txt")
-limit=100
-print(cows)
 
-print(greedy_cow_transport(cows, limit))
-print(brute_force_cow_transport(cows, limit))
+def main():
+    print(brute_force_cow_transport({'MooMoo': 50, 'Boo': 20, 'Horns': 25, 'Lotus': 40, 'Milkshake': 40, 'Miss Bella': 25},
+                              100))
+    compare_cow_transport_algorithms()
 
 
+if __name__ == '__main__':
+    main()
